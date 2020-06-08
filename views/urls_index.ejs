@@ -11,7 +11,7 @@
 <body>
   <main style="margin: 1em;">
     <%- include('partials/_header') %>
-    <a href='#'>This is an anchor link!</a> 
+    <!-- <a href='#'>This is an anchor link!</a>  -->
     <h3>My URLs</h3>
     <table class="table">
       <thead>
@@ -24,6 +24,7 @@
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
+            <!-- <td href= 'urls[url]' ><%= url %></td>  ?? MAYBE ??-->
             <td><%= urls[url] %></td>
           </tr>
         <% } %>
