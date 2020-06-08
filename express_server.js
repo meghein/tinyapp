@@ -38,8 +38,9 @@ app.post("/urls", (req, res) => {
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
-
-
+const generateRandomString = () => {
+  return Math.random().toString(36).substr(6);
+};
 
         
 // app.get("/hello", (req, res) => {
