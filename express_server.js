@@ -12,7 +12,7 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect('/urls');
 });
 
 app.listen(PORT, () => {
@@ -49,6 +49,7 @@ app.get("/u/urls/404", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   if (longURL === undefined) {
+    // res.send('404: PAGE NOT FOUND')
     res.redirect('urls/404')
     } else {
     res.redirect(longURL);
