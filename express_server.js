@@ -35,7 +35,24 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const newShort = generateRandomString()
+  const newLong = Object.values(req.body)
+  urlDatabase[newShort] = 'http://' + newLong;
+  res.redirect(`urls/${newShort}`);
+
+});
+
+app.get("/u/urls/404", (req, res) => {
+  res.render("urls_404");
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  if (longURL === undefined) {
+    res.redirect('urls/404')
+    } else {
+    res.redirect(longURL);
+  }
 });
 
 const generateRandomString = () => {
