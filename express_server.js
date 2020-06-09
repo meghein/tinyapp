@@ -34,19 +34,14 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   const newShort = generateRandomString()
+  console.log(req.body)
   const newLong = Object.values(req.body)
   urlDatabase[newShort] = 'http://' + newLong;
   res.redirect(`urls/${newShort}`);
 
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL]
-  console.log(urlDatabase)
-  res.redirect("/urls")
-})
 
 app.get("/u/urls/404", (req, res) => {
   res.render("urls_404");
@@ -57,10 +52,23 @@ app.get("/u/:shortURL", (req, res) => {
   if (longURL === undefined) {
     // res.send('404: PAGE NOT FOUND')
     res.redirect('urls/404')
-    } else {
+  } else {
     res.redirect(longURL);
   }
 });
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL]
+  res.redirect("/urls")
+})
+
+app.post("/urls/:shortURL/update", (req, res) => {
+  const newURL = req.body.longURL
+  const shortURL = req.params.shortURL
+  urlDatabase[shortURL] = 'http://' + newURL
+  res.redirect("/urls")
+})
+
 
 const generateRandomString = () => {
   return Math.random().toString(36).substr(6);
