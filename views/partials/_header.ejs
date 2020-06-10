@@ -14,8 +14,8 @@
       <% if (!user) { %>
       <form action="/login" method="POST">
         <label for="user"></label>
-        <a class="nav-item nav-link" href="/urls/register">Register</a>
-        <button type="login" class="btn btn-success">Login</button>
+        <a class="nav-item nav-link" href="/register">Register</a>
+        <a class="nav-item nav-link" href="/login">Login</a>
       </form>
       <% } else { %>
         <form action="/logout" method="POST">
