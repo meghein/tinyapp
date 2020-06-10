@@ -19,7 +19,8 @@
       </form>
       <% } else { %>
         <form action="/logout" method="POST">
-          <p><%= `Logged in as: ${user["email"]}` %></p><button type="logout" class="btn btn-success">Logout</button>
+          <p><%= `Logged in as: ${user["email"]}` %></p>
+          <button type="logout" class="btn btn-success">Logout</button>
         </form>
       <% } %>
     </span>  

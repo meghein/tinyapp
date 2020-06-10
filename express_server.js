@@ -30,6 +30,30 @@ const generateRandomString = () => {
   return Math.random().toString(36).substr(6);
 };
 
+const addNewUser = (email, password) => {
+
+  const userID = generateRandomString();
+
+  const newUser = {
+    id: userID,
+    email,
+    password,
+  };
+
+  users[userID] = newUser;
+
+  return userID;
+};
+
+const findUserByEmail = email => {
+
+  for (let userID in users) {
+    if (users[userID].email === email) {
+      return users[userID];
+    }
+  }
+}
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -40,6 +64,7 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase, user: users[req.cookies["user_ID"]] };
+  console.log(templateVars.user)
   res.render("urls_index", templateVars);
 });
 
@@ -76,28 +101,36 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username
-  res.cookie("username", username)
-  res.redirect("/urls")
+  // const username = req.body.username
+  // res.cookie("username", username)
+  // res.redirect("/urls")
 })
 
 app.post("/logout", (req, res) => {
-  const username = req.cookies.username
-  res.clearCookie("username", username)
+  res.clearCookie("user_ID")
   res.redirect("/urls")
 })
 
 app.post("/urls/register", (req, res) => {
-  const newUserId = `userId_${generateRandomString()}`
-  
-  users[newUserId] = {
-      "id": newUserId,
-      "email": req.body.email,
-      "password": req.body.password
+
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const newUser = findUserByEmail(email);
+  if (!email || !password) {
+    res.status(400).send('Please enter a valid email/password')
+  }
+  if (!newUser) {
+    res.cookie('user_ID', addNewUser(email, password));
+    console.log('user_ID')
+    console.log(users)
+    res.redirect('/urls');
+
+  } else {
+    res.status(400).send('User is already registered!');
   }
 
-  res.cookie("user_ID", newUserId)
-  res.redirect("/urls")
+  console.log(users)
   
 });
 
@@ -122,8 +155,3 @@ app.post("/urls/:shortURL/update", (req, res) => {
   urlDatabase[shortURL] = 'http://' + newURL
   res.redirect("/urls")
 })
-
-        
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
