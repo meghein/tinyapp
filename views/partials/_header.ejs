@@ -11,16 +11,15 @@
       </div>
     </div>
     <span class="d-flex justify-content-end">
-      <% if (!username) { %>
+      <% if (!user) { %>
       <form action="/login" method="POST">
         <label for="user"></label>
-        <input type="text" name="username" placeholder="username">
+        <a class="nav-item nav-link" href="/urls/register">Register</a>
         <button type="login" class="btn btn-success">Login</button>
       </form>
       <% } else { %>
-        <!-- string or whatever to signify you're logged in -->
         <form action="/logout" method="POST">
-          <a class="navbar-brand" href="/urls"><%= `Logged in as: ${username}` %></a><button type="logout" class="btn btn-success">Logout</button>
+          <p><%= `Logged in as: ${user["email"]}` %></p><button type="logout" class="btn btn-success">Logout</button>
         </form>
       <% } %>
     </span>  

@@ -13,6 +13,22 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
+const generateRandomString = () => {
+  return Math.random().toString(36).substr(6);
+};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -23,17 +39,22 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_ID"]] };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { user: users[req.cookies["user_ID"]] };
   res.render("urls_new", templateVars);
 });
 
+app.get("/urls/register", (req, res) => {
+  let templateVars = { user: users[req.cookies["user_ID"]] };
+  res.render("urls_register", templateVars);
+});
+
 app.get("/u/urls/404", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { user: users[req.cookies["user_ID"]] };
   res.render("urls_404", templateVars);
 });
 
@@ -41,7 +62,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
+    user: users[req.cookies["user_ID"]]
   };
   res.render("urls_show", templateVars);
 });
@@ -66,11 +87,24 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls")
 })
 
+app.post("/urls/register", (req, res) => {
+  const newUserId = `userId_${generateRandomString()}`
+  
+  users[newUserId] = {
+      "id": newUserId,
+      "email": req.body.email,
+      "password": req.body.password
+  }
+
+  res.cookie("user_ID", newUserId)
+  res.redirect("/urls")
+  
+});
+
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   if (longURL === undefined) {
-    // res.send('404: PAGE NOT FOUND')
     res.redirect('urls/404')
   } else {
     res.redirect(longURL);
@@ -88,11 +122,6 @@ app.post("/urls/:shortURL/update", (req, res) => {
   urlDatabase[shortURL] = 'http://' + newURL
   res.redirect("/urls")
 })
-
-
-const generateRandomString = () => {
-  return Math.random().toString(36).substr(6);
-};
 
         
 // app.get("/hello", (req, res) => {
