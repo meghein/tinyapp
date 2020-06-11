@@ -2,33 +2,37 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
+const bcrypt = require('bcrypt');
+const saltRounds = 10; //for bcrypt
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+// app.use(bcrypt());
+
 app.set('view engine', 'ejs');
 
 const urlDatabase = {
   'b2xVn2': {
     longURL: 'http://www.lighthouselabs.ca',
-    userID: 'abc123'
+    userID: 'colour'
   },
   '9sm5xK': {
     longURL: 'http://www.google.com',
-    userID: 'abc123'
+    userID: 'test123'
   },
 };
 
 const users = {
-  'userRandomID': {
-    id: 'userRandomID',
-    email: 'user@example.com',
-    password: 'purple-monkey-dinosaur'
+  'colour': {
+    id: 'colour',
+    email: 'red@blue.com',
+    password: bcrypt.hashSync('purple', saltRounds)
   },
-  'user2RandomID': {
-    id: 'user2RandomID',
-    email: 'user2@example.com',
-    password: 'dishwasher-funk'
+  'test123': {
+    id: 'test123',
+    email: 'tester@test.com',
+    password: bcrypt.hashSync('test', saltRounds)
   }
 };
 
@@ -39,11 +43,12 @@ const generateRandomString = () => {
 const addNewUser = (email, password) => {
 
   const userID = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
   const newUser = {
     id: userID,
     email,
-    password,
+    password: hashedPassword,
   };
 
   users[userID] = newUser;
@@ -76,7 +81,7 @@ const authenticateUser = (email, password) => {
 
   const user = findUserByEmail(email);
 
-  if (user && user.password === password) {
+  if (user && bcrypt.compareSync(password, user.password)) {
     return user.id;
   }
 };
@@ -191,6 +196,28 @@ app.post('/urls', (req, res) => {
   res.redirect(`urls/${newShort}`);
 });
 
+app.post('/register', (req, res) => {
+
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const newUser = findUserByEmail(email);
+
+  if (!email || !password) {
+    res.status(400).send('Please enter a valid email/password');
+  }
+  if (!newUser) {
+    res.cookie('user_ID', addNewUser(email, password));
+    console.log(users)
+
+    res.redirect('/urls');
+
+  } else {
+    res.status(400).send('User is already registered!');
+  }
+  
+});
+
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -209,26 +236,6 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('user_ID');
   res.redirect('/urls');
-});
-
-app.post('/register', (req, res) => {
-
-  const email = req.body.email;
-  const password = req.body.password;
-
-  const newUser = findUserByEmail(email);
-  if (!email || !password) {
-    res.status(400).send('Please enter a valid email/password');
-  }
-  if (!newUser) {
-    res.cookie('user_ID', addNewUser(email, password));
-
-    res.redirect('/urls');
-
-  } else {
-    res.status(400).send('User is already registered!');
-  }
-  
 });
 
 
