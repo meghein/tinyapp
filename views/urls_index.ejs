@@ -11,8 +11,15 @@
 <body>
   <main style="margin: 1em;">
     <%- include('partials/_header') %>
-    <!-- <a href='#'>This is an anchor link!</a>  -->
-    <h3>My URLs</h3>
+
+    <% if (!Object.keys(userUrls).length) { %>
+    
+      <h1> Looks like you don't have any TinyURLs yet...</h1>
+      <a href='/urls/new/'>Click here to create your first here</a>
+    
+    <% } else { %>
+    
+      <h3>My URLs</h3>
     <table class="table">
       <thead>
         <tr>
@@ -21,10 +28,10 @@
         </tr>
       </thead>
       <tbody>
-        <% for(let url in urls) { %>
+        <% for(let url in userUrls) { %>
           <tr>
             <td><a href='/urls/<%= url %>/'><%= url %></a></td>
-            <td><a href='<%= urls[url] %>'><%= urls[url] %></a></td>
+            <td><a href='<%= userUrls[url].longURL %>'><%= userUrls[url].longURL %></a></td>
             <td><form method="GET" action="/urls/<%= url %>/">
               <button type="update" class="btn btn-primary">Edit</button>
             </form></td>
@@ -35,6 +42,11 @@
         <% } %>
       </tbody>
     </table>
+    
+    <% } %>
+
+
+    
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
