@@ -79,6 +79,11 @@ app.get('/403', (req, res) => {
   res.render('403', templateVars);
 });
 
+app.get('/400', (req, res) => {
+  let templateVars = { user: users[req.session['user_id']] };
+  res.render('400', templateVars);
+});
+
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const definedURL = findUrl(shortURL, urlDatabase);
@@ -99,7 +104,7 @@ app.get('/urls/:shortURL', (req, res) => {
 
   } else {
     
-    res.status(400).send('This URL doesn\'t belong to you!');
+    res.redirect('403');
 
   }
   
@@ -110,7 +115,7 @@ app.post('/urls', (req, res) => {
   const newId = req.session['user_id'];
   const newShort = addNewUrl(newLong, newId, urlDatabase);
   
-  res.redirect(`urls/${newShort}`);
+  res.redirect(`/urls/${newShort}`);
 });
 
 app.post('/register', (req, res) => {
@@ -121,7 +126,7 @@ app.post('/register', (req, res) => {
   const newUser = findUserByEmail(email, users);
 
   if (!email || !password) {
-    res.status(403).send('Please enter a valid email/password');
+    res.redirect('400');
   }
   if (!newUser) {
     req.session['user_id'] = addNewUser(email, password, users);
@@ -129,7 +134,7 @@ app.post('/register', (req, res) => {
     res.redirect('/urls');
 
   } else {
-    res.status(403).send('User is already registered!');
+    res.redirect('400');
   }
   
 });
@@ -144,7 +149,7 @@ app.post('/login', (req, res) => {
     req.session['user_id'] = user.id;
     res.redirect('/urls');
   } else {
-    res.status(403).send('Please enter valid email/password');
+    res.redirect('400');
   }
 
 });
@@ -159,7 +164,7 @@ app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   
   if (longURL === undefined) {
-    res.redirect('urls/404');
+    res.redirect('404');
   } else {
     res.redirect(longURL);
   }
@@ -177,7 +182,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
   } else {
 
-    res.status(400).send('This URL doesn\'t belong to you!');
+    es.redirect('403');
 
   }
   
@@ -198,7 +203,7 @@ app.post('/urls/:shortURL/update', (req, res) => {
 
   } else {
 
-    res.status(400).send('This URL doesn\'t belong to you!');
+    es.redirect('403');
 
   }
 

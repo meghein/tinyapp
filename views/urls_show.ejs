@@ -7,25 +7,39 @@
 </head>
 
 <body>
+
   <%- include('partials/_header') %>
-  <div class="card text-center">
-      <div class="card-header"></div>
-      <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
-      </div>
-      <div class="card-footer text-muted">
-        <h2>Edit</h2>
+
+  <div class="text-center p-3 mb-2 bg-transparent text-dark">
+    <div class="header">
+      <h1 class="title">TinyURL for: <%= longURL %></h1>
+      <h4 class="card-text">Short URL: <a class="text-reset" href="/u/<%= shortURL %>"><%= shortURL %></a></h4>
+    </div>
+    <div class="footer">
+      <!-- <h5 class="font-weight-light text-center">
+        <h3>Edit</h3>
         <form class="form-inline" action="/urls/<%= shortURL %>/update" method="POST" style="width:auto">
-            <div class="form-group mb-2" style="margin:auto">
+            <div class="form-group mb-2" style="margin: auto">
             <label for="longURL">New URL:</label>
             <input type="text" name="longURL" placeholder="i.e. www.example.com">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-outline-success">Submit</button>
         </form>
-      </div>
-  </div>
+      </h5> -->
 
 
+      
+      <h5 class="font-weight-light text-center pt-4 pb-3">
+        <h3>Edit</h3>
+        <form class="form-inline" action="/urls/<%= shortURL %>/update" method="POST" style="margin: auto">
+            <div class="form-group mb-2" style="margin: auto">
+              <label for="longURL">New URL:</label>
+              <input class="form-control text-center" type="text" name="longURL" placeholder="i.e. - www.raccoons.com" style="width: 300px; margin: 1em">
+              <button type="submit" class="btn btn-outline-success">Submit</button>
+        </form>
+      </h5>
+    </div>
+    <img src="https://thumbs.gfycat.com/InfantileSentimentalIrishwolfhound-size_restricted.gif" />
+</div>
 
 
   <!-- Bootstrap JS -->

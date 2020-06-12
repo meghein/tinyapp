@@ -10,44 +10,56 @@
 </head>
 <body>
   <%- include('partials/_header') %>
-  <main style="margin: 1em;">
+  <div class="p-3 mb-2 bg-transparent text-dark">
+
+  <main>
 
     <% if (!Object.keys(userUrls).length) { %>
-    
-      <h1> Looks like you don't have any TinyURLs yet...</h1>
-      <a href='/urls/new/'>Click here to create your first here</a>
+      
+      <div class="text-center" style="width: auto">
+        <h1> Looks like you don't have any TinyURLs yet...</h1>
+        <h3 class="font-weight-light">
+          <a href="/urls/new" class="text-reset">Click here</a> to create your first!
+        </h3>
+        <a href="/urls/new"><img src="https://i.pinimg.com/originals/9e/b4/8c/9eb48c2c4d686c7337a8eb864459006e.gif"/></a>
+      </div>
     
     <% } else { %>
-    
-      <h3>My URLs</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">Short URL</th>
-          <th scope="col">Long URL</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% for(let url in userUrls) { %>
+
+      <!-- <div class="text-center" style="width: auto"> -->
+        <h1>My URLs</h1>
+
+        <table class="table table-striped">
+        <thead>
           <tr>
-            <td><a href='/urls/<%= url %>/'><%= url %></a></td>
-            <td><a href='<%= userUrls[url].longURL %>'><%= userUrls[url].longURL %></a></td>
-            <td><form method="GET" action="/urls/<%= url %>/">
-              <button type="update" class="btn btn-primary">Edit</button>
-            </form></td>
-            <td><form method="POST" action="/urls/<%= url %>/delete">
-              <button type="delete" class="btn btn-secondary">Delete</button>
-            </form></td>
+            <th scope="col">TinyURLs</th>
+            <th scope="col">Long URLs</th>
+            <th scope="col"> </th>
+            <th scope="col"> </th>
           </tr>
-        <% } %>
-      </tbody>
-    </table>
-    
-    <% } %>
+        </thead>
+        <tbody>
+          <% for(let url in userUrls) { %>
+            <tr>
+              <td><a class="text-reset" href='/urls/<%= url %>/'><%= url %></a></td>
+              <td><a class="text-reset" href='<%= userUrls[url].longURL %>'><%= userUrls[url].longURL %></a></td>
+              <td><form method="GET" action="/urls/<%= url %>/">
+                <button type="update" class="btn btn-outline-dark">Edit</button>
+              </form></td>
+              <td><form method="POST" action="/urls/<%= url %>/delete">
+                <button type="delete" class="btn btn-outline-danger">Delete</button>
+              </form></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
 
-
+      <% } %>
     
   </main>
+
+
+  </div>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>

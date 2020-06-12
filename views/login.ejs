@@ -7,7 +7,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-    <title>New URL - TinyApp Example</title>
+    <title>TinyApp - Login </title>
   </head>
 
   <body>
@@ -15,8 +15,8 @@
     <%- include('./partials/_header') %>
 
     <div class="container">
-
-      <h3>Login</h3>
+      <div class="p-3 mb-2 bg-transparent text-dark">
+      <h1>Login</h1>
       <h5>Welcome back! Please login below:</h5>
   
       <form method="post" action="/login">
@@ -41,10 +41,14 @@
           
           </div>
   
-          <input type="submit" class="btn btn-primary" value="Login" />
+          <input type="submit" class="btn btn-outline-primary" value="Login" />
         </div>
       </form>
-  
+      <h3 class="font-weight-light pt-5">
+        <h3>Need to register??</h3>
+        <a href="/register">Click here</a> to sign up.
+      </h3>
+    </div>
   </div>
  
 
