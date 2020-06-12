@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 
 app.get('/urls', (req, res) => {
   
-  const userId = req.session['user_id'];
+  const userId = req.session['userCookieID'];
   const user = users[userId];
   const userDatabase = findUserUrls(userId, urlDatabase);
 
@@ -46,7 +46,7 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   
-  const user = users[req.session['user_id']];
+  const user = users[req.session['userCookieID']];
 
   let templateVars = { user };
 
@@ -60,34 +60,34 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  let templateVars = { user: users[req.session['user_id']] };
+  let templateVars = { user: users[req.session['userCookieID']] };
   res.render('register', templateVars);
 });
 
 app.get('/login', (req, res) => {
-  let templateVars = { user: users[req.session['user_id']] };
+  let templateVars = { user: users[req.session['userCookieID']] };
   res.render('login', templateVars);
 });
 
 app.get('/404', (req, res) => {
-  let templateVars = { user: users[req.session['user_id']] };
+  let templateVars = { user: users[req.session['userCookieID']] };
   res.render('404', templateVars);
 });
 
 app.get('/403', (req, res) => {
-  let templateVars = { user: users[req.session['user_id']] };
+  let templateVars = { user: users[req.session['userCookieID']] };
   res.render('403', templateVars);
 });
 
 app.get('/400', (req, res) => {
-  let templateVars = { user: users[req.session['user_id']] };
+  let templateVars = { user: users[req.session['userCookieID']] };
   res.render('400', templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const definedURL = findUrl(shortURL, urlDatabase);
-  const currentUser = users[req.session['user_id']];
+  const currentUser = users[req.session['userCookieID']];
 
   if (!definedURL) {
     
@@ -98,7 +98,7 @@ app.get('/urls/:shortURL', (req, res) => {
     let templateVars = {
       shortURL,
       longURL: urlDatabase[shortURL].longURL,
-      user: users[req.session['user_id']]
+      user: users[req.session['userCookieID']]
     };
     res.render('urls_show', templateVars);
 
@@ -111,8 +111,8 @@ app.get('/urls/:shortURL', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
+  const newId = req.session['userCookieID'];
   const newLong = req.body.longURL;
-  const newId = req.session['user_id'];
   const newShort = addNewUrl(newLong, newId, urlDatabase);
   
   res.redirect(`/urls/${newShort}`);
@@ -129,7 +129,7 @@ app.post('/register', (req, res) => {
     res.redirect('400');
   }
   if (!newUser) {
-    req.session['user_id'] = addNewUser(email, password, users);
+    req.session['userCookieID'] = addNewUser(email, password, users);
 
     res.redirect('/urls');
 
@@ -146,7 +146,7 @@ app.post('/login', (req, res) => {
   const user = authenticateUser(email, password, users);
   
   if (user) {
-    req.session['user_id'] = user.id;
+    req.session['userCookieID'] = user.id;
     res.redirect('/urls');
   } else {
     res.redirect('400');
@@ -173,7 +173,7 @@ app.get('/u/:shortURL', (req, res) => {
 app.post('/urls/:shortURL/delete', (req, res) => {
   
   const shortURL = req.params.shortURL;
-  const currentUser = users[req.session['user_id']];
+  const currentUser = users[req.session['userCookieID']];
 
   if (currentUser.id === urlDatabase[shortURL].userID) {
 
@@ -191,11 +191,11 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/urls/:shortURL/update', (req, res) => {
 
   const shortURL = req.params.shortURL;
-  const currentUser = users[req.session['user_id']];
+  const currentUser = users[req.session['userCookieID']];
 
   if (currentUser.id === urlDatabase[shortURL].userID) {
 
-    const updatedUrl = {longURL: req.body.longURL, userID: req.session['user_id']};
+    const updatedUrl = {longURL: req.body.longURL, userID: req.session['userCookieID']};
   
     urlDatabase[req.params.shortURL] = updatedUrl;
 
