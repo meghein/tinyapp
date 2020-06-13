@@ -15,19 +15,7 @@
       <h1 class="title">TinyURL for: <%= longURL %></h1>
       <h4 class="card-text">Short URL: <a class="text-reset" href="/u/<%= shortURL %>"><%= shortURL %></a></h4>
     </div>
-    <div class="footer">
-      <!-- <h5 class="font-weight-light text-center">
-        <h3>Edit</h3>
-        <form class="form-inline" action="/urls/<%= shortURL %>/update" method="POST" style="width:auto">
-            <div class="form-group mb-2" style="margin: auto">
-            <label for="longURL">New URL:</label>
-            <input type="text" name="longURL" placeholder="i.e. www.example.com">
-            <button type="submit" class="btn btn-outline-success">Submit</button>
-        </form>
-      </h5> -->
-
-
-      
+    <div class="footer">      
       <h5 class="font-weight-light text-center pt-4 pb-3">
         <h3>Edit</h3>
         <form class="form-inline" action="/urls/<%= shortURL %>/update" method="POST" style="margin: auto">

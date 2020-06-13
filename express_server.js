@@ -112,7 +112,14 @@ app.get('/urls/:shortURL', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const newId = req.session['userCookieID'];
-  const newLong = req.body.longURL;
+  let newLong = req.body.longURL;
+
+  if (!newLong.includes('http://www.' || 'https://www.')) {
+    newLong = `https://www.${req.body.longURL}`
+  } else if (!newLong.includes('http://' || 'https://')) {
+    newLong = `https://${req.body.longURL}`
+  };
+
   const newShort = addNewUrl(newLong, newId, urlDatabase);
   
   res.redirect(`/urls/${newShort}`);
