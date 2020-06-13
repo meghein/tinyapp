@@ -20,7 +20,7 @@ app.set('view engine', 'ejs');
 ///////////////////////////////////////////////
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
 
 app.get('/', (req, res) => {
