@@ -79,6 +79,11 @@ app.get('/403', (req, res) => {
   res.render('403', templateVars);
 });
 
+app.get('/401', (req, res) => {
+  let templateVars = { user: users[req.session['userCookieID']] };
+  res.render('401', templateVars);
+});
+
 app.get('/400', (req, res) => {
   let templateVars = { user: users[req.session['userCookieID']] };
   res.render('400', templateVars);
@@ -114,15 +119,19 @@ app.post('/urls', (req, res) => {
   const newId = req.session['userCookieID'];
   let newLong = req.body.longURL;
 
-  if (!newLong.includes('http://www.' || 'https://www.')) {
-    newLong = `https://www.${req.body.longURL}`
+  if (!newLong || !newLong.includes('.')) {
+    res.redirect('/400');
+
+  }else if (!newLong.includes('http://www.' || 'https://www.')) {
+    newLong = `https://www.${req.body.longURL}`;
+    const newShort = addNewUrl(newLong, newId, urlDatabase);
+    res.redirect(`/urls/${newShort}`);
   } else if (!newLong.includes('http://' || 'https://')) {
-    newLong = `https://${req.body.longURL}`
+    newLong = `https://${req.body.longURL}`;
+    const newShort = addNewUrl(newLong, newId, urlDatabase);
+    res.redirect(`/urls/${newShort}`);
   };
 
-  const newShort = addNewUrl(newLong, newId, urlDatabase);
-  
-  res.redirect(`/urls/${newShort}`);
 });
 
 app.post('/register', (req, res) => {
@@ -133,7 +142,7 @@ app.post('/register', (req, res) => {
   const newUser = findUserByEmail(email, users);
 
   if (!email || !password) {
-    res.redirect('400');
+    res.redirect('401');
   }
   if (!newUser) {
     req.session['userCookieID'] = addNewUser(email, password, users);
@@ -141,7 +150,7 @@ app.post('/register', (req, res) => {
     res.redirect('/urls');
 
   } else {
-    res.redirect('400');
+    res.redirect('401');
   }
   
 });
@@ -156,7 +165,7 @@ app.post('/login', (req, res) => {
     req.session['userCookieID'] = user.id;
     res.redirect('/urls');
   } else {
-    res.redirect('400');
+    res.redirect('401');
   }
 
 });
