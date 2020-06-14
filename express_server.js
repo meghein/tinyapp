@@ -89,6 +89,11 @@ app.get('/400', (req, res) => {
   res.render('400', templateVars);
 });
 
+app.get('/400/update', (req, res) => {
+  let templateVars = { user: users[req.session['userCookieID']] };
+  res.render('400-update', templateVars);
+});
+
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const definedURL = findUrl(shortURL, urlDatabase);
@@ -208,18 +213,30 @@ app.post('/urls/:shortURL/update', (req, res) => {
 
   const shortURL = req.params.shortURL;
   const currentUser = users[req.session['userCookieID']];
+  let newLong = req.body.longURL;
+  let updatedURL = {};
+
 
   if (currentUser.id === urlDatabase[shortURL].userID) {
-
-    const updatedUrl = {longURL: req.body.longURL, userID: req.session['userCookieID']};
-  
+    if (!newLong || !newLong.includes('.')) {
+      res.redirect('/400/update');
+    }else if (!newLong.includes('http://www.' || 'https://www.')) {
+      newLong = `https://www.${req.body.longURL}`;
+      updatedUrl = {longURL: newLong, userID: req.session['userCookieID']};
+      
+      
+    } else if (!newLong.includes('http://' || 'https://')) {
+      newLong = `https://${req.body.longURL}`;
+      updatedUrl = {longURL: newLong, userID: req.session['userCookieID']};
+      
+    };
+    
     urlDatabase[req.params.shortURL] = updatedUrl;
-
     res.redirect('/urls');
 
   } else {
 
-    es.redirect('403');
+    res.redirect('403');
 
   }
 
