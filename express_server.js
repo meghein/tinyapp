@@ -123,7 +123,7 @@ app.get('/403', (req, res) => {
 // 404 client error redirect pages for non-existing page
 app.get('/404', (req, res) => {
   let templateVars = { user: users[req.session['userCookieID']] };
-  res.status(404).render('404', templateVars)
+  res.status(404).render('404', templateVars);
 });
 
 // Unique Tiny URL page render if valid url and correct client is logged in,
