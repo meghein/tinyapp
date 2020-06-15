@@ -17,228 +17,195 @@ app.use(cookieSession({
 
 app.set('view engine', 'ejs');
 
-///////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
-app.listen(PORT, () => {
-  console.log(`TinyApp listening on port ${PORT}!`);
-});
-
+// Homepage redirect to '/urls'
 app.get('/', (req, res) => {
   res.redirect('/urls');
 });
 
+// Homepage render if client is logged in, else redirect to login page
 app.get('/urls', (req, res) => {
-  
   const userId = req.session['userCookieID'];
   const user = users[userId];
   const userDatabase = findUserUrls(userId, urlDatabase);
-
   let templateVars = { urls: urlDatabase, userUrls: userDatabase, user };
-
   if (!user) {
     res.redirect('/login');
-
   } else {
     res.render('urls_index', templateVars);
   }
-
 });
 
+// Page to create a new tiny url render if client is logged in, else redirect to login page
 app.get('/urls/new', (req, res) => {
-  
   const user = users[req.session['userCookieID']];
-
   let templateVars = { user };
-
   if (!user) {
     res.redirect('/login');
-
   } else {
     res.render('urls_new', templateVars);
   }
-
 });
 
-app.get('/register', (req, res) => {
-  let templateVars = { user: users[req.session['userCookieID']] };
-  res.render('register', templateVars);
-});
-
+//Login page render
 app.get('/login', (req, res) => {
   let templateVars = { user: users[req.session['userCookieID']] };
   res.render('login', templateVars);
 });
 
-app.get('/404', (req, res) => {
-  let templateVars = { user: users[req.session['userCookieID']] };
-  res.render('404', templateVars);
-});
-
-app.get('/403', (req, res) => {
-  let templateVars = { user: users[req.session['userCookieID']] };
-  res.render('403', templateVars);
-});
-
-app.get('/401', (req, res) => {
-  let templateVars = { user: users[req.session['userCookieID']] };
-  res.render('401', templateVars);
-});
-
-app.get('/400', (req, res) => {
-  let templateVars = { user: users[req.session['userCookieID']] };
-  res.render('400', templateVars);
-});
-
-app.get('/400/update', (req, res) => {
-  let templateVars = { user: users[req.session['userCookieID']] };
-  res.render('400-update', templateVars);
-});
-
-app.get('/urls/:shortURL', (req, res) => {
-  const shortURL = req.params.shortURL;
-  const definedURL = findUrl(shortURL, urlDatabase);
-  const currentUser = users[req.session['userCookieID']];
-
-  if (!definedURL) {
-    
-    res.redirect('/404');
-
-  } else if (currentUser.id === urlDatabase[shortURL].userID && definedURL) {
-    
-    let templateVars = {
-      shortURL,
-      longURL: urlDatabase[shortURL].longURL,
-      user: users[req.session['userCookieID']]
-    };
-    res.render('urls_show', templateVars);
-
-  } else {
-    
-    res.redirect('403');
-
-  }
-  
-});
-
-app.post('/urls', (req, res) => {
-  const newId = req.session['userCookieID'];
-  let newLong = req.body.longURL;
-
-  if (!newLong || !newLong.includes('.')) {
-    res.redirect('/400');
-
-  }else if (!newLong.includes('http://www.' || 'https://www.')) {
-    newLong = `https://www.${req.body.longURL}`;
-    const newShort = addNewUrl(newLong, newId, urlDatabase);
-    res.redirect(`/urls/${newShort}`);
-  } else if (!newLong.includes('http://' || 'https://')) {
-    newLong = `https://${req.body.longURL}`;
-    const newShort = addNewUrl(newLong, newId, urlDatabase);
-    res.redirect(`/urls/${newShort}`);
-  };
-
-});
-
-app.post('/register', (req, res) => {
-
-  const email = req.body.email;
-  const password = req.body.password;
-
-  const newUser = findUserByEmail(email, users);
-
-  if (!email || !password) {
-    res.redirect('401');
-  }
-  if (!newUser) {
-    req.session['userCookieID'] = addNewUser(email, password, users);
-
-    res.redirect('/urls');
-
-  } else {
-    res.redirect('401');
-  }
-  
-});
-
+// Post request for client login page
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-
   const user = authenticateUser(email, password, users);
-  
   if (user) {
     req.session['userCookieID'] = user.id;
     res.redirect('/urls');
   } else {
     res.redirect('401');
   }
-
 });
 
+// Post request to log out client, clear all cookies and redirect to login page
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
+// Register page render
+app.get('/register', (req, res) => {
+  let templateVars = { user: users[req.session['userCookieID']] };
+  res.render('register', templateVars);
+});
 
-app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  
-  if (longURL === undefined) {
-    res.redirect('404');
-  } else {
-    res.redirect(longURL);
+// Post request for new client register page
+app.post('/register', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const newUser = findUserByEmail(email, users);
+  if (!email || !password) {
+    res.redirect('401');
   }
-});
-
-app.post('/urls/:shortURL/delete', (req, res) => {
-  
-  const shortURL = req.params.shortURL;
-  const currentUser = users[req.session['userCookieID']];
-
-  if (currentUser.id === urlDatabase[shortURL].userID) {
-
-    delete urlDatabase[req.params.shortURL];
+  if (!newUser) {
+    req.session['userCookieID'] = addNewUser(email, password, users);
     res.redirect('/urls');
-
   } else {
-
-    es.redirect('403');
-
+    res.redirect('401');
   }
-  
 });
 
-app.post('/urls/:shortURL/update', (req, res) => {
+// 400 client error redirect pages for invalid new url entry
+app.get('/400', (req, res) => {
+  let templateVars = { user: users[req.session['userCookieID']] };
+  res.render('400', templateVars);
 
+});
+
+// 400 client error redirect pages for invalid url entry update
+app.get('/400/update', (req, res) => {
+  let templateVars = { user: users[req.session['userCookieID']] };
+  res.render('400-update', templateVars);
+});
+
+// 401 client error redirect pages for invalid client authentication
+app.get('/401', (req, res) => {
+  let templateVars = { user: users[req.session['userCookieID']] };
+  res.render('401', templateVars);
+});
+
+// 403 client error redirect pages for denied access to a tiny url (wrong client credentials)
+app.get('/403', (req, res) => {
+  let templateVars = { user: users[req.session['userCookieID']] };
+  res.render('403', templateVars);
+});
+
+// 404 client error redirect pages for non-existing page
+app.get('/404', (req, res) => {
+  let templateVars = { user: users[req.session['userCookieID']] };
+  res.render('404', templateVars);
+});
+
+// Unique Tiny URL page render if valid url and correct client is logged in,
+// else - redirect to  404 error page for invalid url or 403 error page for invalid client
+app.get('/urls/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const definedURL = findUrl(shortURL, urlDatabase);
+  const currentUser = users[req.session['userCookieID']];
+  if (!definedURL) {
+    res.redirect('/404');
+  } else if (currentUser.id === urlDatabase[shortURL].userID && definedURL) {
+    let templateVars = {
+      shortURL,
+      longURL: urlDatabase[shortURL].longURL,
+      user: users[req.session['userCookieID']]
+    };
+    res.render('urls_show', templateVars);
+  } else {
+    res.redirect('403');
+  }
+});
+
+// Post a new Tiny url if client is logged in, append url with correct http prefix if not provided by client,
+// else - redirect to  404 error page for invalid url or 403 error page for invalid client
+app.post('/urls', (req, res) => {
+  const newId = req.session['userCookieID'];
+  let newLong = req.body.longURL;
+  if (Object.keys(users).includes(newId)) {
+    if (!newLong || !newLong.includes('.')) {
+      res.redirect('/400');
+    } else if (newLong.includes('http://') || newLong.includes('https://')) {
+      newLong;
+    } else if (!newLong.includes('www.')) {
+      newLong = `https://www.${newLong}`;
+    } else {
+      newLong = `https://${newLong}`;
+    }
+    const newShort = addNewUrl(newLong, newId, urlDatabase);
+    res.redirect(`/urls/${newShort}`);
+  } else {
+    res.redirect('/403');
+  }
+});
+
+// Update a Tiny url from the database if client is logged in, append url with correct http prefix if not provided by client,
+// else - redirect to  404 error page for invalid url or 403 error page for invalid client
+app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL;
   const currentUser = users[req.session['userCookieID']];
   let newLong = req.body.longURL;
-  let updatedURL = {};
-
-
   if (currentUser.id === urlDatabase[shortURL].userID) {
     if (!newLong || !newLong.includes('.')) {
-      res.redirect('/400/update');
-    }else if (!newLong.includes('http://www.' || 'https://www.')) {
-      newLong = `https://www.${req.body.longURL}`;
-      updatedUrl = {longURL: newLong, userID: req.session['userCookieID']};
-      
-      
-    } else if (!newLong.includes('http://' || 'https://')) {
-      newLong = `https://${req.body.longURL}`;
-      updatedUrl = {longURL: newLong, userID: req.session['userCookieID']};
-      
-    };
-    
-    urlDatabase[req.params.shortURL] = updatedUrl;
+      res.redirect('/400');
+    } else if (newLong.includes('http://') || newLong.includes('https://')) {
+      newLong;
+    } else if (!newLong.includes('www.')) {
+      newLong = `https://www.${newLong}`;
+    } else {
+      newLong = `https://${newLong}`;
+    }
+    urlDatabase[req.params.shortURL] = {longURL: newLong, userID: req.session['userCookieID']};
     res.redirect('/urls');
-
   } else {
-
     res.redirect('403');
-
   }
+});
 
+// Delete a Tiny url from database if correct client is logged in,
+// else - redirect to 403 error page for invalid client
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const currentUser = users[req.session['userCookieID']];
+  if (currentUser.id === urlDatabase[shortURL].userID) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect('/urls');
+  } else {
+    res.redirect('403');
+  }
+});
 
+////////////////////////////////////////////////////////////////////
+
+app.listen(PORT, () => {
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
