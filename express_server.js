@@ -151,17 +151,19 @@ app.get('/urls/:shortURL', (req, res) => {
 app.post('/urls', (req, res) => {
   const newId = req.session['userCookieID'];
   let newLong = req.body.longURL;
+  let newShort = {};
   if (Object.keys(users).includes(newId)) {
     if (!newLong || !newLong.includes('.')) {
       res.redirect('/400');
     } else if (newLong.includes('http://') || newLong.includes('https://')) {
-      newLong;
+      newShort = addNewUrl(newLong, newId, urlDatabase);
     } else if (!newLong.includes('www.')) {
       newLong = `https://www.${newLong}`;
+      newShort = addNewUrl(newLong, newId, urlDatabase);
     } else {
       newLong = `https://${newLong}`;
+      newShort = addNewUrl(newLong, newId, urlDatabase);
     }
-    const newShort = addNewUrl(newLong, newId, urlDatabase);
     res.redirect(`/urls/${newShort}`);
   } else {
     res.redirect('/403');
@@ -178,13 +180,14 @@ app.post('/urls/:shortURL/update', (req, res) => {
     if (!newLong || !newLong.includes('.')) {
       res.redirect('/400');
     } else if (newLong.includes('http://') || newLong.includes('https://')) {
-      newLong;
+      urlDatabase[shortURL].longURL = newLong;
     } else if (!newLong.includes('www.')) {
       newLong = `https://www.${newLong}`;
+      urlDatabase[shortURL].longURL = newLong;
     } else {
       newLong = `https://${newLong}`;
+      urlDatabase[shortURL].longURL = newLong;
     }
-    urlDatabase[shortURL].longURL = newLong;
     res.redirect('/urls');
   } else {
     res.redirect('403');
