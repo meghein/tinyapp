@@ -98,26 +98,26 @@ app.post('/register', (req, res) => {
 // 400 client error redirect pages for invalid new url entry
 app.get('/400', (req, res) => {
   let templateVars = { user: users[req.session['userCookieID']] };
-  res.status(400).res.render('400', templateVars);
+  res.status(400).render('400', templateVars);
 
 });
 
 // 400 client error redirect pages for invalid url entry update
 app.get('/400/update', (req, res) => {
   let templateVars = { user: users[req.session['userCookieID']] };
-  res.status(400).res.render('400-update', templateVars);
+  res.status(400).render('400-update', templateVars);
 });
 
 // 401 client error redirect pages for invalid client authentication
 app.get('/401', (req, res) => {
   let templateVars = { user: users[req.session['userCookieID']] };
-  res.status(401).res.render('401', templateVars);
+  res.status(401).render('401', templateVars);
 });
 
 // 403 client error redirect pages for denied access to a tiny url (wrong client credentials)
 app.get('/403', (req, res) => {
   let templateVars = { user: users[req.session['userCookieID']] };
-  res.status(403).res.render('403', templateVars);
+  res.status(403).render('403', templateVars);
 });
 
 // 404 client error redirect pages for non-existing page
