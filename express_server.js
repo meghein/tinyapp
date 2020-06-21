@@ -1,6 +1,6 @@
 const PORT = 8080;
 
-const { addNewUrl, addNewUser, findUserByEmail, findUrl, findUserUrls, authenticateUser } = require('./helpers');
+const { addNewUrl, addNewUser, findUserByEmail, findUrl, findUserUrls, authenticateUser, formatLongUrl } = require('./helpers');
 const { urlDatabase, users } = require('./databaseObjects');
 
 const express = require('express');
@@ -21,17 +21,23 @@ app.set('view engine', 'ejs');
 
 // Homepage redirect to '/urls'
 app.get('/', (req, res) => {
-  res.redirect('/urls');
+  // Find user by checking if encrypted cookie is found in users database.
+  const user = users[req.session['userCookieID']];
+  if (!user) {
+    res.redirect('/login');
+  } else {
+    res.redirect('/urls');
+  }
 });
 
-// Homepage render if client is logged in, else redirect to login page
+// Homepage render if client is logged in, else return a 401 error page.
 app.get('/urls', (req, res) => {
   const userId = req.session['userCookieID'];
   const user = users[userId];
   const userDatabase = findUserUrls(userId, urlDatabase);
   let templateVars = { urls: urlDatabase, userUrls: userDatabase, user };
   if (!user) {
-    res.redirect('/login');
+    res.redirect('/401')
   } else {
     res.render('urls_index', templateVars);
   }
@@ -56,14 +62,13 @@ app.get('/login', (req, res) => {
 
 // Post request for client login page
 app.post('/login', (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const user = authenticateUser(email, password, users);
+    // Find user by checking if given matching email/password is found in users database.
+  const user = authenticateUser(req.body.email, req.body.password, users);
   if (user) {
     req.session['userCookieID'] = user.id;
     res.redirect('/urls');
   } else {
-    res.redirect('401');
+    res.redirect('/401');
   }
 });
 
@@ -83,15 +88,15 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const newUser = findUserByEmail(email, users);
   if (!email || !password) {
-    res.redirect('401');
+    res.redirect('/401');
   }
+  const newUser = findUserByEmail(email, users);
   if (!newUser) {
     req.session['userCookieID'] = addNewUser(email, password, users);
     res.redirect('/urls');
   } else {
-    res.redirect('401');
+    res.redirect('/401');
   }
 });
 
@@ -126,7 +131,7 @@ app.get('/404', (req, res) => {
   res.status(404).render('404', templateVars);
 });
 
-// Unique Tiny URL page render if valid url and correct client is logged in,
+// Unique Tiny url page render if valid url and correct client is logged in,
 // else - redirect to  404 error page for invalid url or 403 error page for invalid client
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
@@ -142,7 +147,7 @@ app.get('/urls/:shortURL', (req, res) => {
     };
     res.render('urls_show', templateVars);
   } else {
-    res.redirect('403');
+    res.redirect('/403');
   }
 });
 
@@ -150,21 +155,14 @@ app.get('/urls/:shortURL', (req, res) => {
 // else - redirect to  404 error page for invalid url or 403 error page for invalid client
 app.post('/urls', (req, res) => {
   const newId = req.session['userCookieID'];
-  let newLong = req.body.longURL;
-  let newShort = {};
+  const longURL = req.body.longURL;
   if (Object.keys(users).includes(newId)) {
-    if (!newLong || !newLong.includes('.')) {
-      res.redirect('/400');
-    } else if (newLong.includes('http://') || newLong.includes('https://')) {
-      newShort = addNewUrl(newLong, newId, urlDatabase);
-    } else if (!newLong.includes('www.')) {
-      newLong = `https://www.${newLong}`;
-      newShort = addNewUrl(newLong, newId, urlDatabase);
+    if (formatLongUrl(longURL)) {
+      const newShort = addNewUrl(formatLongUrl(longURL), newId, urlDatabase);
+      res.redirect(`/urls/${newShort}`);
     } else {
-      newLong = `https://${newLong}`;
-      newShort = addNewUrl(newLong, newId, urlDatabase);
+      res.redirect('/400')
     }
-    res.redirect(`/urls/${newShort}`);
   } else {
     res.redirect('/403');
   }
@@ -175,22 +173,16 @@ app.post('/urls', (req, res) => {
 app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL;
   const currentUser = users[req.session['userCookieID']];
-  let newLong = req.body.longURL;
+  const longURL = req.body.longURL;
   if (currentUser.id === urlDatabase[shortURL].userID) {
-    if (!newLong || !newLong.includes('.')) {
-      res.redirect('/400');
-    } else if (newLong.includes('http://') || newLong.includes('https://')) {
-      urlDatabase[shortURL].longURL = newLong;
-    } else if (!newLong.includes('www.')) {
-      newLong = `https://www.${newLong}`;
-      urlDatabase[shortURL].longURL = newLong;
+    if (formatLongUrl(longURL)) {
+      urlDatabase[shortURL].longURL = formatLongUrl(longURL);
+      res.redirect('/urls');
     } else {
-      newLong = `https://${newLong}`;
-      urlDatabase[shortURL].longURL = newLong;
+      res.redirect('/400/update');
     }
-    res.redirect('/urls');
   } else {
-    res.redirect('403');
+    res.redirect('/403');
   }
 });
 
@@ -203,7 +195,19 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
   } else {
-    res.redirect('403');
+    res.redirect('/403');
+  }
+});
+
+// If url for the given ID exists: redirects to the corresponding long url.
+// If url for the given ID does not exist: returns 404 error page.
+app.get('/urls/u/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  if (findUrl(shortURL, urlDatabase)) {
+    const longURL =  urlDatabase[shortURL].longURL;
+    res.redirect(longURL);
+  } else {
+    res.redirect('/404');
   }
 });
 

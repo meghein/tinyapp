@@ -1,4 +1,5 @@
-const { bcrypt, saltRounds } = require('./databaseObjects');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const generateRandomString = () => {
   return Math.random().toString(36).substr(6);
@@ -59,11 +60,24 @@ const findUserUrls = (uniqueID, urlDatabase) => {
   return userDatabase;
 };
 
+const formatLongUrl = (longURL) => {
+  if (!longURL || !longURL.includes('.')) {
+    return undefined;
+  } else if (longURL.includes('http://') || longURL.includes('https://')) {
+    return longURL;
+  } else if (!longURL.includes('www.')) {
+    return longURL = `https://www.${longURL}`;
+  } else {
+    return longURL = `https://${longURL}`;
+  }
+}
+
 module.exports = {
   addNewUrl,
   addNewUser,
   findUserByEmail,
   findUrl,
   findUserUrls,
-  authenticateUser
+  authenticateUser,
+  formatLongUrl,
 };
