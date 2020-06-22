@@ -201,7 +201,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 // If url for the given ID exists: redirects to the corresponding long url.
 // If url for the given ID does not exist: returns 404 error page.
-app.get('/urls/u/:shortURL', (req, res) => {
+app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   if (findUrl(shortURL, urlDatabase)) {
     const longURL =  urlDatabase[shortURL].longURL;
